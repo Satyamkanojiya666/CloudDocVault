@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block content %}
+<div class="grid">
+<div class="stat"><b>{{ user.username }}</b><span>Username</span></div>
+<div class="stat" style="border-color:#18a058"><b>{{ n_files }}</b><span>Active files ({{ size|human }})</span></div>
+<div class="stat" style="border-color:#f59f00"><b>{{ used|human }}</b><span>of {{ quota|human }} quota</span></div>
+<div class="stat" style="border-color:#7c5cff"><b>{{ user.created_at[:10] }}</b><span>Member since</span></div></div>
+<div class="card" style="max-width:520px"><h2>&#128273; Change password</h2>
+<form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<input type="password" name="current" placeholder="Current password" required>
+<input type="password" name="new" placeholder="New password (min 8 characters)" required>
+<input type="password" name="again" placeholder="Repeat new password" required>
+<button class="btn">Update password</button></form></div>
+{% endblock %}

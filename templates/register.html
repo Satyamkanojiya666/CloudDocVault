@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<div class="card"><h2>Register</h2>
+<form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<input type="text" name="username" placeholder="Username" required>
+<input type="password" name="password" placeholder="Password (min 8 chars)" required>
+<button class="btn">Create account</button></form></div>
+{% endblock %}

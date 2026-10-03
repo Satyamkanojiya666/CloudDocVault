@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudDocVault</title>
+<script src="{{ url_for('static', filename='app.js') }}?v=7"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--text:#1c2333;--muted:#6b7391;--primary:#2f5bea;--nav:#1f3a8a;--border:#e6e9f2;--input:#c5cbe0;--soft:#e8edff;--ok:#dff5e3;--err:#fde2e2}
+[data-theme=dark]{--bg:#0e1322;--card:#171d33;--text:#e7eaf6;--muted:#9aa3c7;--nav:#0a0f1d;--border:#27304d;--input:#3a4466;--soft:#212a4a;--ok:#143824;--err:#4a1b1b}
+*{box-sizing:border-box}
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}
+nav{background:var(--nav);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+nav .links{display:flex;align-items:center;flex-wrap:wrap;gap:4px 14px}
+nav a,nav button{color:#fff;text-decoration:none;background:none;border:0;font:inherit;cursor:pointer;padding:0}
+nav .me{opacity:.8}
+main{max-width:1000px;margin:24px auto;padding:0 14px}
+a{color:var(--primary)}
+.card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
+h2,h3{margin-top:0}
+input,select,button.btn{padding:9px 10px;border-radius:8px;border:1px solid var(--input);font:inherit;margin:3px 0;background:var(--card);color:var(--text)}
+input[type=text],input[type=password]{width:100%}
+button.btn{background:var(--primary);color:#fff;border:0;cursor:pointer;padding:9px 16px}
+button.btn.small{padding:6px 11px;font-size:13px}
+button.danger{background:#d64545}button.ghost{background:var(--soft);color:var(--primary)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;color:var(--muted)}
+.flash{padding:10px 14px;border-radius:8px;margin-bottom:10px}.success{background:var(--ok)}.error{background:var(--err)}
+.tag{display:inline-block;background:var(--soft);color:var(--primary);border-radius:20px;padding:3px 12px;font-size:13px;margin:2px 6px 2px 0}
+.muted{color:var(--muted);font-size:13px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:5px solid var(--primary)}
+.stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:13px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.bar{background:var(--border);border-radius:8px;height:12px;overflow:hidden;margin:8px 0}.bar>div{background:var(--primary);height:100%}.bar.warn>div{background:#d64545}
+.hero{background:linear-gradient(135deg,#1f3a8a,#2f5bea 60%,#7c5cff);color:#fff;border-radius:16px;padding:34px 26px;margin-bottom:18px}
+.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0 0 16px;opacity:.92}
+.hero a.cta{display:inline-block;background:#fff;color:#1f3a8a;font-weight:600;border-radius:8px;padding:10px 18px;text-decoration:none;margin-right:8px}
+.chips a{display:inline-block;padding:5px 13px;border-radius:20px;border:1px solid var(--input);text-decoration:none;color:var(--text);font-size:13px;margin:2px 4px 2px 0}
+.chips a.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+#dropzone{border:2px dashed var(--input);border-radius:12px;padding:18px;text-align:center;margin-bottom:6px}#dropzone.drag{background:var(--soft);border-color:var(--primary)}
+.file{display:flex;align-items:center;gap:10px}.ico{font-size:22px}.thumb{width:44px;height:44px;object-fit:cover;border-radius:8px}
+details{display:inline-block;margin:2px 4px}details summary{cursor:pointer;color:var(--primary);font-size:14px}
+details form{margin-top:6px;background:var(--soft);padding:8px;border-radius:8px}
+.star{background:none;border:0;font-size:20px;cursor:pointer;color:#f59f00;padding:0 4px}
+.linkbox{width:100%;padding:10px;border:1px solid var(--input);border-radius:8px;font:14px monospace;background:var(--card);color:var(--text)}
+.ok{color:#1a7f37;font-weight:600}.bad{color:#c62828;font-weight:600}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:18px 10px 30px}
+svg text{fill:var(--muted);font-size:9px}
+</style></head><body>
+<nav><strong>&#9729; CloudDocVault</strong><div class="links">
+<a href="{{ url_for('status') }}">Cloud status</a>
+{% if user %}<a href="{{ url_for('dashboard') }}">Dashboard</a><a href="{{ url_for('trash') }}">Trash</a>
+<a href="{{ url_for('activity_page') }}">Activity</a><a href="{{ url_for('account') }}">Account</a>
+<span class="me">{{ user.username }}</span>
+<button id="themeBtn" type="button" title="Dark / light mode">&#9788;</button>
+<form method="post" action="{{ url_for('logout') }}" style="display:inline">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button>Logout</button></form>
+{% else %}<a href="{{ url_for('login') }}">Login</a><a href="{{ url_for('register') }}">Register</a>
+<button id="themeBtn" type="button" title="Dark / light mode">&#9788;</button>{% endif %}
+</div></nav>
+<main>
+{% with msgs = get_flashed_messages(with_categories=true) %}{% for c, m in msgs %}
+<div class="flash {{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
+{% block content %}{% endblock %}
+</main>
+<footer>CloudDocVault v{{ app_version }} &middot; Developed by <strong>{{ developer }}</strong><br>
+Built on AWS: EC2 &middot; Elastic Beanstalk &middot; RDS &middot; S3 &middot; IAM</footer>
+</body></html>

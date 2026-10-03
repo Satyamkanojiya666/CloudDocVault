@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block content %}
+<div class="card"><h2>&#128279; Share link created</h2>
+<p>Anyone with this link can download <strong>{{ doc.original_name }}</strong> without logging in.
+It expires in <strong>{{ label }}</strong>{% if protected %}, and a <strong>password</strong> is required{% endif %}.
+It stops working at once if you delete the file.</p>
+<input id="linkBox" class="linkbox" type="text" readonly value="{{ link }}">
+<p><button id="copyBtn" type="button" class="btn">Copy link</button></p>
+<p class="muted">{% if protected %}Send the password separately (not in the same message as the link).{% endif %}</p>
+<p><a href="{{ url_for('dashboard') }}">&larr; Back to dashboard</a></p></div>
+{% endblock %}

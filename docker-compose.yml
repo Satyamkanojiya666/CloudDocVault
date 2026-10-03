@@ -1,0 +1,11 @@
+# docker compose up --build   ->   http://localhost:8000   (data kept in ./data and ./uploads)
+services:
+  docvault:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-please-use-a-long-random-string}
+      DATABASE_URL: sqlite:////app/data/docvault.db
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads

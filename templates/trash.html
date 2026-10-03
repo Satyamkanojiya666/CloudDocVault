@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block content %}
+<div class="card"><h2>&#128465; Trash</h2>
+<p class="muted">Deleted files stay here until you remove them permanently. They still count towards your storage quota.</p>
+{% if docs %}<div style="overflow-x:auto"><table><tr><th>File</th><th>Size</th><th>Deleted (UTC)</th><th></th></tr>
+{% for d in docs %}<tr><td><span class="ico" style="color:{{ d.color }}">{{ d.icon }}</span> {{ d.original_name }}</td>
+<td>{{ d.size_bytes|human }}</td><td>{{ d.deleted_at }}</td><td>
+<form method="post" action="{{ url_for('restore', doc_id=d.id) }}" style="display:inline"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn small">Restore</button></form>
+<form method="post" action="{{ url_for('purge', doc_id=d.id) }}" style="display:inline" data-confirm="Delete this file forever? This cannot be undone.">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn danger small">Delete forever</button></form></td></tr>{% endfor %}</table></div>
+<form method="post" action="{{ url_for('empty_trash') }}" data-confirm="Permanently delete everything in the trash?" style="margin-top:12px">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn danger">Empty trash</button></form>
+{% else %}<p>The trash is empty.</p>{% endif %}
+<p><a href="{{ url_for('dashboard') }}">&larr; Back to dashboard</a></p></div>
+{% endblock %}

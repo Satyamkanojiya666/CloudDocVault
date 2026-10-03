@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><h1>&#9729; CloudDocVault</h1>
+<p>Secure document storage in the cloud. Upload, organise, preview and share files with expiring links.</p>
+{% if user %}<a class="cta" href="{{ url_for('dashboard') }}">Open dashboard</a>
+{% else %}<a class="cta" href="{{ url_for('register') }}">Create an account</a><a class="cta" href="{{ url_for('login') }}">Login</a>{% endif %}
+<a class="cta" href="{{ url_for('status') }}">Live cloud status</a></div>
+<div class="card"><h3>Built on public-cloud services</h3>
+<span class="tag">IaaS: EC2</span><span class="tag">PaaS: Elastic Beanstalk</span><span class="tag">DBaaS: RDS PostgreSQL</span>
+<span class="tag">Storage: S3</span><span class="tag">Security: IAM / Security Groups</span></div>
+<div class="two">
+<div class="card"><h3>&#128193; Smart file manager</h3><p class="muted">Drag &amp; drop multi-upload, categories, favourites, rename, image/PDF preview, ZIP export and a recycle bin.</p></div>
+<div class="card"><h3>&#128279; Secure sharing</h3><p class="muted">Signed share links that expire in 1 hour, 24 hours or 7 days, optionally protected with a password.</p></div>
+<div class="card"><h3>&#128202; Insights dashboard</h3><p class="muted">Storage donut chart, 14-day upload chart, quota ring, download counters and a full audit log.</p></div>
+<div class="card"><h3>&#128737; Security first</h3><p class="muted">Hashed passwords, CSRF protection, login throttling, secure headers and an exportable activity trail.</p></div>
+</div>
+{% endblock %}

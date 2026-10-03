@@ -1,0 +1,87 @@
+{% extends "base.html" %}{% block content %}
+<div class="card" style="background:linear-gradient(135deg,#1f3a8a,#2f5bea);color:#fff">
+<h2 style="margin-bottom:4px">Welcome back, {{ user.username }} &#128075;</h2>
+<span class="tag">Database: {{ database }}</span><span class="tag">Storage: {{ storage }}</span>
+<span class="tag"><a href="{{ url_for('status') }}" style="text-decoration:none">Live cloud status &rarr;</a></span></div>
+
+<div class="grid">
+<div class="stat"><b>{{ n_files }}</b><span>Files</span></div>
+<div class="stat" style="border-color:#18a058"><b>{{ used|human }}</b><span>of {{ quota|human }} used ({{ percent }}%)</span></div>
+<div class="stat" style="border-color:#f59f00"><b>{{ n_starred }}</b><span>Favourites</span></div>
+<div class="stat" style="border-color:#d6336c"><b>{{ total_downloads }}</b><span>Downloads</span></div>
+<div class="stat" style="border-color:#7c5cff"><b>{{ shares }}</b><span>Share links created</span></div>
+<div class="stat" style="border-color:#868e96"><b>{{ n_trash }}</b><span><a href="{{ url_for('trash') }}">In trash</a></span></div>
+</div>
+
+<div class="two">
+<div class="card"><h3>Storage by file type</h3>
+<div class="row" style="flex-wrap:nowrap;gap:18px">
+<svg viewBox="0 0 42 42" width="150" height="150" role="img" aria-label="Storage by file type">
+<circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>
+{% for s in segments %}{% if s.pct > 0 %}<circle cx="21" cy="21" r="15.9155" fill="none" stroke="{{ s.color }}" stroke-width="6"
+stroke-dasharray="{{ s.pct }} {{ s.gap }}" stroke-dashoffset="{{ s.offset }}"/>{% endif %}{% endfor %}
+<text x="21" y="22.5" text-anchor="middle" style="font-size:5px;fill:var(--text);font-weight:700">{{ active_bytes|human }}</text></svg>
+<div>{% for s in segments %}<div style="margin:5px 0"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:{{ s.color }}"></span>
+{{ s.cat }} <span class="muted">&middot; {{ s.count }} file(s), {{ s.bytes|human }}</span></div>{% endfor %}</div></div></div>
+
+<div class="card"><h3>Uploads &mdash; last 14 days</h3>
+<svg viewBox="0 0 308 92" width="100%" role="img" aria-label="Uploads per day">
+{% for b in bars %}<rect x="{{ b.x }}" y="{{ 70 - (b.h if b.n == 0 else [b.h, 3]|max) }}" width="18"
+height="{{ (b.h if b.n == 0 else [b.h, 3]|max) }}" rx="3" fill="{{ '#2f5bea' if b.n else 'var(--border)' }}"/>
+{% if b.n %}<text x="{{ b.x + 9 }}" y="{{ 66 - [b.h, 3]|max }}" text-anchor="middle">{{ b.n }}</text>{% endif %}
+{% if loop.index0 % 2 == 0 %}<text x="{{ b.x + 9 }}" y="84" text-anchor="middle">{{ b.label }}</text>{% endif %}{% endfor %}</svg>
+<div class="bar {% if percent >= 90 %}warn{% endif %}"><div style="width:{{ percent }}%"></div></div>
+<span class="muted">Quota used: {{ percent }}% (trash counts until you empty it)</span></div>
+</div>
+
+<div class="card"><h3>Upload files</h3>
+<form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div id="dropzone">&#128228; Drag &amp; drop files here, or choose them below<br>
+<input id="fileInput" type="file" name="file" multiple required>
+<div id="fileNames" class="muted"></div></div>
+<span class="muted">pdf, docx, txt, xlsx, csv, pptx, png, jpg &middot; max 5 MB per file</span><br>
+<button class="btn" style="margin-top:8px">Upload</button></form></div>
+
+<div class="card"><h3>My files</h3>
+<div class="chips">
+<a href="{{ url_for('dashboard') }}" class="{{ 'on' if not cat and not only_starred }}">All ({{ n_files }})</a>
+<a href="{{ url_for('dashboard', starred=1) }}" class="{{ 'on' if only_starred }}">&#9733; Favourites ({{ n_starred }})</a>
+{% for c in categories %}<a href="{{ url_for('dashboard', cat=c) }}" class="{{ 'on' if cat == c }}">{{ cat_icon[c] }} {{ c }} ({{ cat_counts[c] }})</a>{% endfor %}</div>
+<form method="get" action="{{ url_for('dashboard') }}" class="row" style="margin:10px 0">
+<input type="hidden" name="cat" value="{{ cat }}">{% if only_starred %}<input type="hidden" name="starred" value="1">{% endif %}
+<input id="liveFilter" type="text" name="q" value="{{ q }}" placeholder="Search files by name" style="flex:1;min-width:150px">
+<select name="sort">
+<option value="new" {{ 'selected' if sort == 'new' }}>Newest first</option>
+<option value="name" {{ 'selected' if sort == 'name' }}>Name A-Z</option>
+<option value="size" {{ 'selected' if sort == 'size' }}>Largest first</option>
+<option value="downloads" {{ 'selected' if sort == 'downloads' }}>Most downloaded</option></select>
+<button class="btn">Apply</button>
+<a class="btn ghost" style="text-decoration:none;padding:9px 14px;border-radius:8px" href="{{ url_for('download_all') }}">&#11015; Download all (ZIP)</a></form>
+{% if docs %}<div style="overflow-x:auto"><table id="fileTable"><tr><th></th><th>File</th><th>Size</th><th>Uploaded (UTC)</th><th>Downloads</th><th>Actions</th></tr>
+{% for d in docs %}<tr data-name="{{ d.original_name|lower }}">
+<td><form method="post" action="{{ url_for('star', doc_id=d.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<button class="star" title="Favourite">{{ '&#9733;'|safe if d.starred else '&#9734;'|safe }}</button></form></td>
+<td><div class="file">{% if d.thumb %}<img class="thumb" loading="lazy" src="{{ url_for('preview', doc_id=d.id) }}" alt="">
+{% else %}<span class="ico" style="color:{{ d.color }}">{{ d.icon }}</span>{% endif %}<span>{{ d.original_name }}</span></div></td>
+<td>{{ d.size_bytes|human }}</td><td>{{ d.uploaded_at }}</td><td>{{ d.downloads }}</td>
+<td>{% if d.previewable %}<a href="{{ url_for('preview', doc_id=d.id) }}" target="_blank" rel="noopener">Preview</a> &middot; {% endif %}
+<a href="{{ url_for('download', doc_id=d.id) }}">Download</a>
+<details><summary>Rename</summary><form method="post" action="{{ url_for('rename', doc_id=d.id) }}">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="text" name="name" value="{{ d.original_name }}" required>
+<button class="btn small">Save</button></form></details>
+<details><summary>Share</summary><form method="post" action="{{ url_for('share', doc_id=d.id) }}">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<select name="expiry">{% for k, v in share_choices.items() %}<option value="{{ k }}">Expires in {{ v[1] }}</option>{% endfor %}</select>
+<input type="password" name="password" placeholder="Optional password">
+<button class="btn small">Create link</button></form></details>
+<form method="post" action="{{ url_for('delete', doc_id=d.id) }}" style="display:inline" data-confirm="Move this file to the trash?">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn danger small">Delete</button></form></td></tr>{% endfor %}</table></div>
+{% elif q or cat or only_starred %}<p>No files match this filter. <a href="{{ url_for('dashboard') }}">Clear filters</a></p>
+{% else %}<p>No documents yet. Upload your first file above.</p>{% endif %}</div>
+
+<div class="card"><h3>Recent activity <a class="muted" href="{{ url_for('activity_page') }}">&middot; view all &amp; export</a></h3>
+{% if activity %}<table><tr><th>When (UTC)</th><th>Action</th><th>Details</th></tr>
+{% for a in activity %}<tr><td>{{ a.created_at }}</td><td>{{ a.action }}</td><td>{{ a.detail }}</td></tr>{% endfor %}</table>
+{% else %}<p class="muted">Your actions will appear here.</p>{% endif %}</div>
+{% endblock %}

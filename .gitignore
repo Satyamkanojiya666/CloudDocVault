@@ -1,0 +1,18 @@
+# secrets and local state - never commit these
+.env
+*.db
+uploads/*
+!uploads/.gitkeep
+
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+data/

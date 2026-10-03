@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<div class="card"><h2>&#128220; Activity log</h2>
+<p class="muted">Audit trail of everything that happened on your account (latest 100).
+<a href="{{ url_for('activity_csv') }}">&#11015; Export all as CSV</a></p>
+{% if rows %}<div style="overflow-x:auto"><table><tr><th>When (UTC)</th><th>Action</th><th>Details</th></tr>
+{% for a in rows %}<tr><td>{{ a.created_at }}</td><td>{{ a.action }}</td><td>{{ a.detail }}</td></tr>{% endfor %}</table></div>
+{% else %}<p>No activity yet.</p>{% endif %}
+<p><a href="{{ url_for('dashboard') }}">&larr; Back to dashboard</a></p></div>
+{% endblock %}

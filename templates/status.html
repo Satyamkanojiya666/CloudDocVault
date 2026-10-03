@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block content %}
+<div class="card"><h2>&#9729; Cloud status</h2>
+<p class="muted">Live checks of every cloud service behind CloudDocVault v{{ app_version }} &middot; region {{ region }} &middot;
+app uptime {{ uptime }} &middot; {{ now }} UTC &middot; <a href="{{ url_for('status_json') }}">JSON</a></p>
+<p>Overall: {% if all_ok %}<span class="ok">&#10004; All systems operational</span>{% else %}<span class="bad">Some services need attention</span>{% endif %}</p>
+<div style="overflow-x:auto"><table><tr><th>Layer</th><th>Service</th><th>Status</th><th>Latency</th><th>Details</th></tr>
+{% for c in checks %}<tr><td><strong>{{ c.layer }}</strong></td><td>{{ c.service }}</td>
+<td>{% if c.ok %}<span class="ok">&#10004; OK</span>{% else %}<span class="bad">&#10008; Down</span>{% endif %}</td>
+<td>{% if c.ms is not none %}{{ c.ms }} ms{% else %}&ndash;{% endif %}</td><td>{{ c.detail }}</td></tr>{% endfor %}</table></div></div>
+
+<div class="card"><h3>Architecture</h3>
+<svg viewBox="0 0 640 230" width="100%" role="img" aria-label="CloudDocVault architecture">
+<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b7391"/></marker></defs>
+<rect x="10" y="85" width="110" height="60" rx="10" fill="#e8edff" stroke="#2f5bea"/><text x="65" y="112" text-anchor="middle" style="font-size:13px;fill:#1f3a8a;font-weight:700">Users</text><text x="65" y="130" text-anchor="middle" style="font-size:10px;fill:#1f3a8a">browser / mobile</text>
+<rect x="190" y="20" width="250" height="190" rx="12" fill="none" stroke="#f59f00" stroke-dasharray="6 4"/><text x="200" y="38" style="font-size:11px;fill:#b87900;font-weight:700">PaaS: Elastic Beanstalk</text>
+<rect x="215" y="70" width="200" height="105" rx="10" fill="#fff4de" stroke="#f59f00"/><text x="315" y="98" text-anchor="middle" style="font-size:13px;fill:#7a5200;font-weight:700">IaaS: EC2 instance</text><text x="315" y="118" text-anchor="middle" style="font-size:10px;fill:#7a5200">nginx + gunicorn + Flask</text><text x="315" y="136" text-anchor="middle" style="font-size:10px;fill:#7a5200">CloudDocVault v{{ app_version }}</text><text x="315" y="156" text-anchor="middle" style="font-size:10px;fill:#7a5200">Security Group + IAM role</text>
+<rect x="510" y="25" width="120" height="60" rx="10" fill="#dff5e3" stroke="#18a058"/><text x="570" y="52" text-anchor="middle" style="font-size:13px;fill:#0f5a31;font-weight:700">DBaaS: RDS</text><text x="570" y="70" text-anchor="middle" style="font-size:10px;fill:#0f5a31">PostgreSQL</text>
+<rect x="510" y="145" width="120" height="60" rx="10" fill="#fde2ec" stroke="#d6336c"/><text x="570" y="172" text-anchor="middle" style="font-size:13px;fill:#8a1c42;font-weight:700">Storage: S3</text><text x="570" y="190" text-anchor="middle" style="font-size:10px;fill:#8a1c42">encrypted files</text>
+<line x1="120" y1="115" x2="213" y2="115" stroke="#6b7391" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="415" y1="100" x2="508" y2="62" stroke="#6b7391" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="415" y1="145" x2="508" y2="172" stroke="#6b7391" stroke-width="2" marker-end="url(#ar)"/></svg></div>
+{% endblock %}
